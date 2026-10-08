@@ -356,6 +356,36 @@ def calculate_forensic_synergy(compA_row, compB_row, ratioA, ratioB):
     }
 
 # ---------------------------------------------------------
+# HELPER: UPLOADED FILE MASS SPECTRUM PARSER
+# ---------------------------------------------------------
+def parse_uploaded_spectrum(uploaded_file, feature_cols):
+    content = uploaded_file.getvalue().decode('utf-8', errors='ignore')
+    vec = np.zeros((1, len(feature_cols)), dtype=np.float32)
+    parsed_count = 0
+    
+    # Check if CSV format
+    lines = content.splitlines()
+    for line in lines:
+        line_s = line.strip()
+        if not line_s or line_s.startswith("#") or line_s.startswith("##"):
+            continue
+        parts = line_s.replace(";", " ").replace(",", " ").split()
+        if len(parts) >= 2:
+            try:
+                mz = int(float(parts[0]))
+                val = float(parts[1])
+                if 10 <= mz <= 550:
+                    vec[0, mz - 10] = val
+                    parsed_count += 1
+            except ValueError:
+                pass
+                
+    max_v = vec.max()
+    if max_v > 0:
+        vec = (vec / max_v) * 100.0
+    return vec, parsed_count
+
+# ---------------------------------------------------------
 # HELPER: ASSIGN FUNCTIONAL ROLE & ANALYTICAL ACTION
 # ---------------------------------------------------------
 def assign_functional_role(name, category, percentage, is_highest):
@@ -763,7 +793,12 @@ with input_subtabs[3]:
         st.success(f"File uploaded: **{uploaded_file.name}** ({uploaded_file.size} bytes)")
         if st.button("🚀 TEST & UNMIX UPLOADED SPECTRUM FILE", key="btn_tab4"):
             st.session_state.novel_formulation_meta = None
-            st.session_state.active_sample_name = uploaded_file.name
+            up_vec, p_count = parse_uploaded_spectrum(uploaded_file, feature_cols)
+            if p_count > 0:
+                st.session_state.active_query_vec = up_vec
+                st.session_state.active_sample_name = f"File: {uploaded_file.name} ({p_count} peaks)"
+            else:
+                st.error("Could not parse valid m/z intensity pairs from uploaded file. Please check file format.")
 
 # ALWAYS RENDER ANALYSIS FOR THE ACTIVE QUERY VECTOR
 if st.session_state.active_query_vec is not None:
