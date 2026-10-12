@@ -1,0 +1,6 @@
+{
+  "name": "forensic-drug-analysis-frontend",
+  "private": true,
+  "type": "module",
+  "description": "Native browser modules. No build step or npm dependencies required."
+}

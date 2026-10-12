@@ -1,85 +1,74 @@
-# 🔬 AI Forensic Drug Analysis & Mixture Deconvolution Suite
+# forensic-drug-analysis
 
-An **ISO/IEC 17025 Compliant Forensic Mass Spectrometry Deconvolution & AI Classification System** trained on the official **SWGDRUG Mass Spectral Library v3.14** ($N = 3,826$ reference spectra).
+An HTML/CSS/JavaScript frontend connected to the existing Python spectral analysis engines. The interface uses a lavender/white palette, dark-purple controls, an optimized generated laboratory photograph, and a vertically scrolling translucent workspace. All eight features use real library data and persistent local records.
 
-![Python](https://img.shields.io/badge/Python-3.10+-0284c7?style=flat&logo=python&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-ff4b4b?style=flat&logo=streamlit&logoColor=white)
-![SWGDRUG](https://img.shields.io/badge/SWGDRUG-v3.14-16a34a?style=flat)
-![Accreditation](https://img.shields.io/badge/ISO%2FIEC-17025-0f172a?style=flat)
+## Run locally
 
----
+Use Python 3.10 or later from the repository directory:
 
-## 🌟 Key Features
-
-* **🧪 NNLS Multi-Component Mixture Deconvolution:**
-  Uses Non-Negative Least Squares (`scipy.optimize.nnls`) to unmix complex multi-component street drug samples across 541 binned $m/z$ channels ($m/z$ 10–550).
-
-* **📊 3-Panel Spectral Overlay & Residual Error Analysis ($e(m/z)$):**
-  Renders interactive head-to-tail spectral comparisons displaying:
-  1. Experimental Query Spectrum
-  2. AI Reconstructed Composite Spectrum ($\hat{\mathbf{S}}_{\text{recon}}$)
-  3. Residual Peak Difference Spectrum ($e(m/z) = I_{\text{exp}} - \hat{I}_{\text{recon}}$) to flag unmatched fragment ions and trace impurities.
-
-* **🏷️ Functional Role Classification:**
-  Categorizes deconvolved constituents into **Primary Active Substances**, **Inert Diluents / Excipients** (lactose, mannitol, sugars), **Pharmacological Adulterants** (caffeine, phenacetin, levamisole), and **Clandestine Synthesis Residuals**.
-
-* **🎯 $R^2$ Goodness-of-Fit & Statistical Metrics:**
-  Quantifies spectral unmixing quality using $R^2$ scores, Root Mean Square Error (RMSE), and Reverse Match Indexing (RMI).
-
-* **🔗 Forensic Batch Profile Matching:**
-  Compares deconvolved component ratios against cataloged seizure signatures to identify common-source regional supply chain batches.
-
-* **🔥 Novel Formulation Synthesis & Synergistic Toxicity Intelligence:**
-  Forward-synthesize test mixtures of Component A and Component B at custom ratios to evaluate **Synergistic Toxicity Hazard Scores (1–10)**, **Detector Masking Interference Indices**, and **Trafficking Profiles**.
-
----
-
-## 🚀 Quick Start
-
-### 1. Clone Repository
-```bash
-git clone https://github.com/Nyasa139/forensic-drug-analysis.git
-cd forensic-drug-analysis
+```powershell
+python -m pip install -r requirements.txt
+python server.py --port 8503
 ```
 
-### 2. Install Dependencies
-```bash
-pip install -r requirements.txt
-```
+Open http://127.0.0.1:8503. To use another port, change `--port`. The frontend and API share one local origin; no Node.js installation, frontend build step, account, or API key is required. Opening `frontend/index.html` directly is insufficient because the real calculations require the local API.
 
-### 3. Launch Streamlit Application
-```bash
-streamlit run app.py
-```
-Open your browser at `http://localhost:8501`.
+The previous Streamlit `app.py` remains available for compatibility, but `server.py` is the entry point for the new interface. Run only one server on a given port.
 
----
+## Structure
 
-## 📁 Repository Structure
-
-```
+```text
 forensic-drug-analysis/
-├── app.py                   # Main Streamlit Web Application UI & Deconvolution Engine
-├── parse_jcamp.py           # JCAMP-DX (SWGDRUG 3.14) Parsing & Mass Spectrum Binner
-├── train_model.py           # Random Forest Classifier Training Pipeline
-├── swgdrug_library.csv      # Metadata for 3,826 SWGDRUG Reference Compounds
-├── swgdrug_features.csv     # Digitized 541 m/z Channel Mass Spectral Matrix
-├── model.pkl                # Trained Random Forest Model Weights
-├── features.pkl             # Feature Column Definitions (mz_10 to mz_550)
-├── requirements.txt         # Project Dependencies
-└── README.md                # Project Documentation
+├── server.py                       # Local API and static frontend server
+├── frontend/
+│   ├── index.html                  # Semantic pages and accessible forms
+│   ├── styles.css                  # Responsive lavender glass design system
+│   ├── assets/
+│   │   └── laboratory.webp         # Optimized generated laboratory background
+│   └── js/
+│       ├── api.js                  # API transport, file uploads and downloads
+│       ├── components.js           # Tables, charts and real analysis reports
+│       ├── notebook.js             # Evidence notebook components and workflows
+│       └── app.js                  # Navigation and feature controllers
+├── analysis_core.py                # Validated parser and spectral fitting
+├── simulation_core.py              # Reproducible signal experiments
+├── evidence_notebook.py            # Persistent case store and integrity checks
+├── swgdrug_library.csv             # Bundled reference metadata
+├── swgdrug_features.csv            # Bundled spectral vectors
+├── requirements.txt
+└── __pycache__/
+    ├── analysis_history.sqlite3    # Existing saved runs, retained
+    └── evidence_notebooks/         # Existing case records, retained
 ```
 
----
+## Features
 
-## 🔬 Scientific & Mathematical Methodology
+1. Overview: actual library, analysis and notebook counts; recent saved runs.
+2. Spectrum analysis: reference, manual peaks and multi-record file inputs; matching, NNLS fit, signed residuals and report exports.
+3. Mixture simulator: two/three signals, measurement disturbances, reproducible seeds, blind library recovery, fingerprint diagnostics and controlled ratio sweeps.
+4. Batch upload: up to 50 spectra with individual file errors and full report downloads.
+5. Reference library: literal search, molecular-mass filters, pagination, spectra and CSV exports.
+6. History: restore and export existing persistent runs.
+7. Evidence notebook: analysis snapshots, supporting attachments, peak observations, conflicting findings, review notes and HTML/JSON/ZIP case exports.
+8. Methodology: actual equations, thresholds, data provenance and interpretation limits.
 
-1. **Mass Spec Feature Resampling:** Digitizes GC-MS spectra into 541 binned channels ($10 \le m/z \le 550$).
-2. **Reverse Match Indexing ($R$-Fit):** Evaluates reference spectrum presence while discounting adulterant peaks.
-3. **NNLS Spectral Unmixing:** Solves $\min_{\mathbf{c} \ge \mathbf{0}} \|\mathbf{S}_{\text{mix}} - \mathbf{M}\mathbf{c}\|_2^2$ to derive exact component content percentages.
-4. **Random Forest Classification:** Ensembles 150 Decision Trees over unmixed spectra to output drug family classification probabilities.
+No fabricated data or confidence claims are used. Empty-state text is clearly identified. The peak-list placeholder is an example format only. Supporting chromatogram/FTIR attachments are retained for manual review; they are not automatically interpreted.
 
----
+## Accessibility and implementation
 
-## 📜 Standards & Compliance
-Designed according to **SWGDRUG (Scientific Working Group for the Analysis of Seized Drugs)** analytical guidelines and **ISO/IEC 17025** forensic laboratory quality control standards.
+Semantic landmarks, descriptive labels, a skip link, keyboard menu/navigation, focus indicators, status/error announcements, reduced-motion support and accessible SVG chart descriptions are included. The decorative background is hidden from assistive technology. Main text uses AA-contrast dark colours against near-white surfaces. The panel has an independent slim scrollbar, while the laboratory image stays fixed.
+
+User-supplied names and notes are escaped before HTML rendering; uploads are size-limited and processed locally. Evidence files retain SHA-256 checksums. The server listens on 127.0.0.1 and rejects cross-origin JSON mutations. It is a local workstation app; an internet deployment would require a separate authentication, authorization and operations design.
+
+## Checks
+
+```powershell
+python -m unittest test_frontend_api -v
+node --test frontend/js/components.test.js
+```
+
+Node.js is optional and is used only for the JavaScript component checks. API tests use isolated history/notebook storage and real reference data. Existing scientific-engine and notebook tests remain in the repository.
+
+## Interpretation
+
+Cosine similarity is not a calibrated identity probability. NNLS coefficients are relative spectral fit weights, not mass fractions, concentration or purity. Exact duplicates and nonunique solutions require review. Synthetic sweeps are exploratory, not validated detection limits. Review status is analyst-entered; the local notebook activity log is not a tamper-proof chain of custody.

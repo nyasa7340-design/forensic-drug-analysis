@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4B2A7B">
+  <meta name="description" content="A local forensic drug analysis workspace for reference spectra, mixture experiments, and evidence review.">
+  <title>forensic-drug-analysis · Analysis workspace</title>
+  <link rel="preload" href="assets/laboratory.webp" as="image" type="image/webp">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#workspace">Skip to analysis workspace</a>
+  <!-- The photograph is decorative; its accessible description is intentionally empty. -->
+  <div class="laboratory-background" aria-hidden="true"></div>
+  <header class="site-header">
+    <a class="brand" href="#overview" aria-label="forensic-drug-analysis home">
+      <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 3h6m-5 0v7l-5 8a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-8V3M8 15h8"/></svg></span>
+      <span>forensic-drug-analysis<small>Reference analysis workspace</small></span>
+    </a>
+    <button class="menu-toggle secondary" id="menu-toggle" aria-expanded="false" aria-controls="main-navigation">Menu</button>
+    <nav id="main-navigation" aria-label="Main navigation">
+      <a href="#overview" data-route="overview">Overview</a>
+      <a href="#analysis" data-route="analysis">Analysis</a>
+      <a href="#simulator" data-route="simulator">Simulator</a>
+      <a href="#batch" data-route="batch">Batch</a>
+      <a href="#library" data-route="library">Library</a>
+      <a href="#history" data-route="history">History</a>
+      <a href="#notebook" data-route="notebook">Evidence</a>
+      <a href="#methodology" data-route="methodology">Methodology</a>
+    </nav>
+  </header>
+  <section class="intro" aria-labelledby="site-title">
+    <div><p class="eyebrow">FORENSIC CHEMISTRY / LOCAL WORKSPACE</p><h1 id="site-title">Forensic spectral analysis</h1><p>Compare spectra. Examine mixture fits. Keep the evidence together.</p></div>
+    <div class="connection-chip"><span id="connection-light" class="status-light" aria-hidden="true"></span><span id="connection-label">Connecting to local library…</span></div>
+  </section>
+  <main id="workspace" class="working-panel" tabindex="-1" aria-label="Analysis workspace">
+    <div class="workspace-bar"><span id="page-label">Workspace overview</span><span class="library-stamp">SWGDRUG 3.14 <span aria-hidden="true">·</span> m/z 10–550</span></div>
+    <div id="notification" class="notification" role="status" aria-live="polite" hidden></div>
+    <div class="workspace-content">
+      <section id="page-overview" class="page" aria-labelledby="overview-title">
+        <div class="section-heading"><div><p class="eyebrow">WORKSPACE</p><h2 id="overview-title">Workspace overview</h2><p>Reference comparisons and reproducible analysis records.</p></div><a class="button" href="#analysis">Start an analysis <span aria-hidden="true">↗</span></a></div>
+        <div class="stat-grid" id="overview-stats" aria-live="polite"><article class="stat"><span>Reference spectra</span><strong>…</strong></article><article class="stat"><span>Mass channels</span><strong>…</strong></article><article class="stat"><span>Saved analyses</span><strong>…</strong></article><article class="stat"><span>Evidence notebooks</span><strong>…</strong></article></div>
+        <div class="card-grid"><article class="card"><span class="card-number">01 / COMPARE</span><h3>Spectrum analysis</h3><p>Search the reference library, paste measured peaks, or load a spectrum file. Review ranked matches and residuals.</p><a href="#analysis">Open analysis →</a></article><article class="card"><span class="card-number">02 / EXPERIMENT</span><h3>Mixture simulator</h3><p>Combine reference signals, introduce noise and missing peaks, and inspect how well the library recovers them.</p><a href="#simulator">Open simulator →</a></article><article class="card"><span class="card-number">03 / DOCUMENT</span><h3>Evidence notebook</h3><p>Link saved analyses, attach supporting evidence, and record the observations behind your interpretation.</p><a href="#notebook">Open evidence →</a></article></div>
+        <div class="split-heading"><h3>Recent analyses</h3><a href="#history">View history</a></div><div id="recent-runs" class="table-wrap"><p class="empty">Loading saved analyses…</p></div>
+        <aside class="notice"><strong>Screening, with the evidence in view.</strong> Similarity is not an identity probability. Fit weights describe spectral contributions, not concentration or purity.</aside>
+      </section>
+      <section id="page-analysis" class="page" aria-labelledby="analysis-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">SPECTRUM ANALYSIS</p><h2 id="analysis-title">Compare a mass spectrum</h2><p>Results change when you submit an analysis. Each run is saved locally.</p></div></div>
+        <form id="analysis-form" class="card form-card">
+          <fieldset><legend>Input method</legend><div class="segmented"><label><input type="radio" name="input-mode" value="reference" checked> Reference</label><label><input type="radio" name="input-mode" value="text"> Paste peaks</label><label><input type="radio" name="input-mode" value="file"> Upload file</label></div></fieldset>
+          <div id="analysis-reference"><label for="analysis-entry">Reference compound</label><select id="analysis-entry" class="reference-select" required></select><p class="help">A reference self-match checks the workflow; it does not validate performance on unknown samples.</p></div>
+          <div id="analysis-text" hidden><label for="sample-name">Sample name</label><input id="sample-name" value="Measured spectrum" maxlength="150"><label for="peak-text">Peak list</label><textarea id="peak-text" rows="5" placeholder="Example format only: 58:100, 91:35, 105:12"></textarea><p class="help">Use m/z:intensity pairs or one m/z,intensity pair per line. m/z 10–550, finite nonnegative intensities.</p></div>
+          <div id="analysis-file" hidden><label for="spectrum-file">CSV, text, or uncompressed JCAMP-DX</label><input id="spectrum-file" type="file" accept=".csv,.txt,.jdx,.dx,.hpj"><label for="file-record">Spectrum within file</label><select id="file-record" disabled><option>Select a file first</option></select><p id="file-help" class="help">Up to 20 MB. Multi-record files are kept separate; wider JCAMP records show excluded peak counts.</p></div>
+          <button type="submit">Analyze spectrum</button>
+        </form><div id="analysis-results" class="results"></div>
+      </section>
+      <section id="page-simulator" class="page" aria-labelledby="simulator-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">MIXTURE EXPERIMENTS</p><h2 id="simulator-title">Build and test a signal mixture</h2><p>Signal coefficients, measurement challenges, and recovery diagnostics.</p></div></div>
+        <form id="simulator-form" class="card form-card">
+          <div class="form-grid"><div><label for="sim-a">Reference A</label><select id="sim-a" class="reference-select" required></select></div><div><label for="sim-b">Reference B</label><select id="sim-b" class="reference-select" required></select></div></div>
+          <label class="checkbox-label"><input id="third-enabled" type="checkbox"> Add a third reference signal</label><div id="third-reference" hidden><label for="sim-c">Reference C</label><select id="sim-c" class="reference-select"></select></div>
+          <div class="form-grid"><div><label for="share-a">Reference A coefficient (%)</label><input id="share-a" type="number" min="0" max="100" step="1" value="70" required></div><div><label for="share-c">Reference C coefficient (%)</label><input id="share-c" type="number" min="0" max="100" step="1" value="0" disabled></div></div><p id="share-summary" class="help">Reference B receives the remaining coefficient.</p>
+          <fieldset><legend>Measurement conditions</legend><div class="form-grid four"><div><label for="sim-noise">Noise SD</label><input id="sim-noise" type="number" min="0" max="20" step="0.5" value="0"></div><div><label for="sim-loss">Missing peaks (%)</label><input id="sim-loss" type="number" min="0" max="60" value="0"></div><div><label for="sim-extra">Extra ions</label><input id="sim-extra" type="number" min="0" max="8" value="0"></div><div><label for="sim-seed">Experiment seed</label><input id="sim-seed" type="number" min="0" max="999999" value="42"></div></div><p class="help">Gaussian noise affects all bins; negative values are clipped. Peak loss applies to clean peaks ≥1. Extra ions appear in initially empty bins.</p></fieldset>
+          <div class="button-row"><button type="submit" name="action" value="preview">Preview signals</button><button type="submit" name="action" value="analyze" class="secondary">Run blind recovery</button><button type="submit" name="action" value="sweep" class="secondary">Run ratio sweep</button></div>
+        </form><div id="simulation-output"></div><div id="simulation-results" class="results"></div>
+      </section>
+      <section id="page-batch" class="page" aria-labelledby="batch-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">BATCH ANALYSIS</p><h2 id="batch-title">Process multiple spectra</h2><p>Each spectrum is analyzed separately and saved in history.</p></div></div>
+        <form id="batch-form" class="card form-card"><label for="batch-files">Spectrum files</label><input id="batch-files" type="file" accept=".csv,.txt,.jdx,.dx,.hpj" multiple required><p class="help">Up to 50 spectra per batch and 20 MB per file. Combined upload size must fit within the 30 MB request limit.</p><button type="submit">Analyze batch</button></form><div id="batch-output"></div><div id="batch-results" class="results"></div>
+      </section>
+      <section id="page-library" class="page" aria-labelledby="library-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">REFERENCE LIBRARY</p><h2 id="library-title">Explore reference spectra</h2><p>Bundled SWGDRUG 3.14, dated January 22, 2025.</p></div><button id="library-export" class="secondary">Export filtered library</button></div>
+        <div class="card filter-bar"><div><label for="library-search">Compound, formula, or entry ID</label><input id="library-search" type="search" placeholder="Search the library"></div><div><label for="mass-min">Min. mass (Da)</label><input id="mass-min" type="number" min="0" value="0"></div><div><label for="mass-max">Max. mass (Da)</label><input id="mass-max" type="number" min="0" placeholder="No maximum"></div></div><p id="library-count" class="help"></p><div id="library-table" class="table-wrap"></div><div class="pagination"><button id="library-prev" class="secondary">Previous</button><span id="library-page"></span><button id="library-next" class="secondary">Next</button></div><div id="library-spectrum"></div>
+      </section>
+      <section id="page-history" class="page" aria-labelledby="history-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">SAVED RECORDS</p><h2 id="history-title">Analysis history</h2><p>Latest 500 runs on this computer. Browsing does not create new records.</p></div><button id="history-export" class="secondary">Export history index</button></div><div id="history-table" class="table-wrap"></div><div id="history-results" class="results"></div>
+      </section>
+      <section id="page-notebook" class="page" aria-labelledby="notebook-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">EVIDENCE REVIEW</p><h2 id="notebook-title">Evidence notebook</h2><p>Preserve analyses, supporting files, and the observations behind a case.</p></div></div>
+        <details class="card" id="create-notebook"><summary>Create a notebook</summary><form id="notebook-create-form" class="form-card"><label for="case-title">Case title</label><input id="case-title" required maxlength="150"><div class="form-grid"><div><label for="case-sample">Sample or exhibit reference</label><input id="case-sample" maxlength="150"></div><div><label for="case-analyst">Analyst name (optional)</label><input id="case-analyst" maxlength="150"></div></div><button type="submit">Create notebook</button></form></details>
+        <label for="notebook-select">Open notebook</label><select id="notebook-select"><option>No notebooks saved yet</option></select><div id="notebook-body"></div>
+      </section>
+      <section id="page-methodology" class="page" aria-labelledby="method-title" hidden>
+        <div class="section-heading"><div><p class="eyebrow">METHODS & INTERPRETATION</p><h2 id="method-title">Understand the result</h2><p>Reproducible calculations with their limits stated alongside the evidence.</p></div></div>
+        <div class="method-grid"><article class="card"><h3>Validate & normalize</h3><p>Finite, nonnegative intensities and at least one positive peak are required. m/z is binned to the nearest integer; half values round upward. Duplicate bins are summed. The largest peak becomes 100.</p><p>Manual/CSV peaks outside 10–550 are rejected. Wider JCAMP records are cropped with an explicit exclusion count. Compressed JCAMP formats are rejected.</p></article><article class="card"><h3>Compare references</h3><p>Cosine similarity compares the input with every reference. It ranges from 0 to 1 and describes spectral shape, not an identity probability. Ties use library order; exact matching entries are listed.</p><p>Scores below 0.85 are labelled inconclusive. This is an unvalidated screening heuristic.</p></article><article class="card"><h3>Fit candidate signals</h3><p>Nonnegative least squares minimizes reconstruction error. Start with 60 cosine candidates; add up to 20 candidates from positive residuals in each of three passes. Exact duplicate spectra use a stable representative with alternative entry IDs.</p><p>All positive coefficients are reported. Similar spectra may produce nonunique solutions.</p></article><article class="card"><h3>Review the residual</h3><p>Residual = input − reconstruction. RMSE uses all 541 normalized intensity channels. R² retains negative values. Relative residual is residual norm divided by input norm.</p><p>Fit weights are normalized coefficients, not calibrated mass fractions, concentrations, or purity.</p></article></div>
+        <aside class="notice"><strong>Independent evidence remains necessary.</strong> The platform does not infer toxicity, seizure provenance, novel compounds, or laboratory accreditation from spectral matching. Supporting attachments and review status are analyst-entered. The notebook activity log is not a tamper-proof chain of custody.</aside>
+        <p class="help">The imported category field was generated from compound-name rules; it is not presented as verified pharmacological classification. Synthetic self-matches and ratio sweeps do not establish unknown-sample performance.</p><p><a href="https://swgdrug.org/ms.htm" target="_blank" rel="noopener noreferrer">SWGDRUG library</a> · <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.nnls.html" target="_blank" rel="noopener noreferrer">SciPy NNLS</a></p><p id="library-checksum" class="checksum"></p>
+      </section>
+    </div>
+  </main>
+  <footer><span>forensic-drug-analysis</span><span>Local reference screening · Analyst review required</span></footer>
+  <noscript>This application requires JavaScript to connect its controls to the local analysis server.</noscript>
+</body>
+</html>
