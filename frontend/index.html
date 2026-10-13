@@ -8,7 +8,7 @@
   <title>forensic-drug-analysis · Analysis workspace</title>
   <link rel="preload" href="assets/laboratory.webp" as="image" type="image/webp">
   <link rel="stylesheet" href="styles.css">
-  <script type="module" src="js/app.js?v=mixture-results-20261013"></script>
+  <script type="module" src="js/app.js?v=analysis-freshness-20261013"></script>
 </head>
 <body>
   <a class="skip-link" href="#workspace">Skip to analysis workspace</a>
@@ -47,10 +47,10 @@
         <aside class="notice"><strong>Screening, with the evidence in view.</strong> Similarity is not an identity probability. Fit weights describe spectral contributions, not concentration or purity.</aside>
       </section>
       <section id="page-analysis" class="page" aria-labelledby="analysis-title" hidden>
-        <div class="section-heading"><div><p class="eyebrow">SPECTRUM ANALYSIS</p><h2 id="analysis-title">Compare a mass spectrum</h2><p>Results change when you submit an analysis. Each run is saved locally.</p></div></div>
+        <div class="section-heading"><div><p class="eyebrow">SPECTRUM ANALYSIS</p><h2 id="analysis-title">Compare a mass spectrum</h2><p>Reference self-checks intentionally score a perfect match. To analyze measured evidence, choose Paste peaks or Upload file. Results clear when the input changes.</p></div></div>
         <form id="analysis-form" class="card form-card">
-          <fieldset><legend>Input method</legend><div class="segmented"><label><input type="radio" name="input-mode" value="reference" checked> Reference</label><label><input type="radio" name="input-mode" value="text"> Paste peaks</label><label><input type="radio" name="input-mode" value="file"> Upload file</label></div></fieldset>
-          <div id="analysis-reference"><label for="analysis-entry">Reference compound</label><select id="analysis-entry" class="reference-select" required></select><p class="help">A reference self-match checks the workflow; it does not validate performance on unknown samples.</p></div>
+          <fieldset><legend>Input method</legend><div class="segmented"><label><input type="radio" name="input-mode" value="reference" checked> Reference self-check</label><label><input type="radio" name="input-mode" value="text"> Paste peaks</label><label><input type="radio" name="input-mode" value="file"> Upload file</label></div></fieldset>
+          <div id="analysis-reference"><label for="analysis-entry">Reference compound</label><select id="analysis-entry" class="reference-select" required></select><p class="help">This compares a stored reference spectrum with itself. It checks the workflow, not an unknown sample.</p></div>
           <div id="analysis-text" hidden><label for="sample-name">Sample name</label><input id="sample-name" value="Measured spectrum" maxlength="150"><label for="peak-text">Peak list</label><textarea id="peak-text" rows="5" placeholder="Example format only: 58:100, 91:35, 105:12"></textarea><p class="help">Use m/z:intensity pairs or one m/z,intensity pair per line. m/z 10–550, finite nonnegative intensities.</p></div>
           <div id="analysis-file" hidden><label for="spectrum-file">CSV, text, or uncompressed JCAMP-DX</label><input id="spectrum-file" type="file" accept=".csv,.txt,.jdx,.dx,.hpj"><label for="file-record">Spectrum within file</label><select id="file-record" disabled><option>Select a file first</option></select><p id="file-help" class="help">Up to 20 MB. Multi-record files are kept separate; wider JCAMP records show excluded peak counts.</p></div>
           <button type="submit">Analyze spectrum</button>

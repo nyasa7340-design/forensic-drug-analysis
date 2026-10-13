@@ -1,9 +1,9 @@
 import {api,filePayload,download,csv} from './api.js';
-import {escape,number,table,metrics,spectrum,sweepChart,reportHtml} from './components.js?v=mixture-results-20261013';
+import {escape,number,table,metrics,spectrum,sweepChart,reportHtml} from './components.js?v=analysis-selfcheck-20261013';
 import {notebookController} from './notebook.js';
 
 const $=selector=>document.querySelector(selector);
-const state={library:[],history:[],filtered:[],page:0,upload:null};
+const state={library:[],history:[],filtered:[],page:0,upload:null,analysisStale:false};
 const titles={overview:'Workspace overview',analysis:'Spectrum analysis',simulator:'Mixture experiments',batch:'Batch analysis',library:'Reference library',history:'Analysis history',notebook:'Evidence notebook',methodology:'Methods & interpretation'};
 
 function notify(message,error=false) {
@@ -20,6 +20,12 @@ async function busy(container,work) {
 }
 
 async function refreshHistory() {state.history=await api('history');return state.history;}
+function invalidateAnalysisResults() {
+  const output=$('#analysis-results');
+  if(!output.innerHTML.trim()||state.analysisStale)return;
+  state.analysisStale=true;
+  output.innerHTML='<aside class="notice analysis-stale" role="status"><strong>Input changed.</strong> Previous metrics were cleared. Submit Analyze spectrum to calculate results for the current input.</aside>';
+}
 const notebooks=notebookController(notify,busy,refreshHistory);
 
 async function refreshOverview() {
@@ -63,6 +69,10 @@ document.addEventListener('keydown',event=>{if(event.key==='Escape'){$('#main-na
 // Input parsing stays on the server, matching the existing validation behavior.
 $('#analysis-form').addEventListener('change',event=>{
   if(event.target.name==='input-mode')for(const mode of ['reference','text','file'])$(`#analysis-${mode}`).hidden=event.target.value!==mode;
+  invalidateAnalysisResults();
+});
+$('#analysis-form').addEventListener('input',event=>{
+  if(event.target.matches('#sample-name,#peak-text'))invalidateAnalysisResults();
 });
 $('#spectrum-file').addEventListener('change',()=>busy($('#analysis-form'),async()=>{
   state.upload=null;$('#file-record').disabled=true;
@@ -75,7 +85,7 @@ $('#analysis-form').addEventListener('submit',event=>{
     const mode=$('input[name="input-mode"]:checked').value;
     const payload=mode==='reference'?{mode,entry_id:Number($('#analysis-entry').value)}:mode==='text'?{mode,name:$('#sample-name').value,text:$('#peak-text').value}:{mode,file:state.upload,record:Number($('#file-record').value)};
     if(mode==='file'&&!state.upload)throw new Error('Select and parse a spectrum file first.');
-    const report=await api('analyze',payload);$('#analysis-results').innerHTML=reportHtml(report);notify('Analysis saved. Review the results below.');await refreshOverview();
+    const report=await api('analyze',payload);$('#analysis-results').innerHTML=reportHtml(report);state.analysisStale=false;notify('Analysis saved. Review the results below.');await refreshOverview();
   });
 });
 
