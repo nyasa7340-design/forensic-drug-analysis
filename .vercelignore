@@ -6,7 +6,6 @@ __pycache__/
 test_*.py
 requirements-streamlit.txt
 streamlit_app.py
-app.py
 simulator.py
 train_model.py
 parse_jcamp.py

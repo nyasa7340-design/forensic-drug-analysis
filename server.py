@@ -255,6 +255,11 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_json({'error':'The server could not complete this request.'},500)
 
 
+handler = Handler
+app = Handler
+application = Handler
+
+
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port',type=int,default=8503)
