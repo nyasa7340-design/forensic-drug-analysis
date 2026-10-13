@@ -144,7 +144,15 @@ def load_library(directory):
     return metadata, matrix
 
 
-def analyze(vector, metadata, matrix, candidate_limit=60):
+def analyze(vector, metadata, matrix, candidate_limit=60, exclude_entry_ids=None):
+    """Compare a spectrum with the library, optionally withholding known references."""
+    if exclude_entry_ids:
+        excluded = {int(entry_id) for entry_id in exclude_entry_ids}
+        keep = ~metadata["id"].astype(int).isin(excluded).to_numpy()
+        metadata = metadata.loc[keep].reset_index(drop=True)
+        matrix = matrix[keep]
+        if not len(matrix):
+            raise ValueError("At least one library reference must remain for comparison.")
     query = normalize(vector)
     norms = np.linalg.norm(matrix, axis=1)
     units = matrix / norms[:, None]

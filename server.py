@@ -17,6 +17,8 @@ import sqlite3
 import sys
 import uuid
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT if (ROOT / 'swgdrug_library.csv').exists() else ROOT.parent.parent
 sys.path.insert(0, str(DATA))
@@ -52,10 +54,12 @@ def history_report(run_id):
     return json.loads(row['report'])
 
 
-def run_analysis(vector, sample, source, simulation=None, settings=None, excluded=0):
-    report = analyze(vector, LIBRARY, MATRIX)
+def run_analysis(vector, sample, source, simulation=None, settings=None, excluded=0,
+                 exclude_entry_ids=None, reference_holdout=None):
+    report = analyze(vector, LIBRARY, MATRIX, exclude_entry_ids=exclude_entry_ids)
     report.update(run_id=uuid.uuid4().hex, timestamp=now(), sample=str(sample)[:150], source=source,
                   simulation=simulation, simulation_settings=settings, excluded_peak_count=excluded,
+                  reference_holdout=reference_holdout,
                   library_version='SWGDRUG 3.14 (bundled)', library_sha256=DIGEST,
                   interpretation='Screening comparison. Fit weights are spectral coefficients, not concentration or purity. Similarity is not an identity probability.')
     with history_connection() as conn:
@@ -167,7 +171,13 @@ class Handler(SimpleHTTPRequestHandler):
                 mode=body.get('mode')
                 if mode=='reference':
                     index=BY_ID[int(body['entry_id'])]
-                    return self.send_json(run_analysis(MATRIX[index],str(LIBRARY.iloc[index]['name']),'Reference self-check'))
+                    selected=LIBRARY.iloc[index]
+                    identical=np.flatnonzero(np.all(np.isclose(MATRIX, MATRIX[index], atol=1e-8, rtol=0), axis=1))
+                    excluded_ids=LIBRARY.iloc[identical]['id'].astype(int).tolist()
+                    holdout={'selected_entry_id':int(selected['id']), 'selected_name':str(selected['name']),
+                             'excluded_entry_ids':excluded_ids}
+                    return self.send_json(run_analysis(MATRIX[index],str(selected['name']),'Reference holdout check',
+                                                       exclude_entry_ids=excluded_ids,reference_holdout=holdout))
                 if mode=='text':
                     record=parse_spectra(body['text'],str(body.get('name','Measured spectrum')))[0]
                     return self.send_json(run_analysis(record.vector,record.name,'Manual peak list'))

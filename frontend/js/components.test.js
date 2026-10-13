@@ -24,13 +24,14 @@ test('Mixture reports headline the component fit, not a misleading single refere
   assert.ok(html.includes('Candidate fit weights · review these components'));
   assert.ok(html.includes('Flephedrone'));
 });
-test('Reference self-check reports explain why its metrics are perfect',()=>{
-  const report={source:'Reference self-check',sample:'Sildenafil',timestamp:'today',status:'Exact spectral match',cosine_similarity:1,r_squared:1,rmse:0,relative_residual:0,peak_count:8,best_name:'Sildenafil',best_entry_id:42,library_version:'test',query:Array(541).fill(0),reconstructed:Array(541).fill(0),residual:Array(541).fill(0),matches:[],components:[],candidate_count:0,run_id:'fixture',library_sha256:'test'};
+test('Reference holdout reports disclose withheld references and variable comparison metrics',()=>{
+  const report={source:'Reference holdout check',reference_holdout:{selected_entry_id:42,selected_name:'Sildenafil',excluded_entry_ids:[42,43]},sample:'Sildenafil',timestamp:'today',status:'Tentative library match',cosine_similarity:.74,r_squared:.62,rmse:2.3,relative_residual:.38,peak_count:8,best_name:'Example match',best_entry_id:77,library_version:'test',query:Array(541).fill(0),reconstructed:Array(541).fill(0),residual:Array(541).fill(0),matches:[],components:[],candidate_count:5,run_id:'fixture',library_sha256:'test'};
   const html=reportHtml(report);
-  assert.ok(html.includes('Self-match cosine'));
-  assert.ok(html.includes('Workflow check only'));
-  assert.ok(html.includes('compares a library spectrum with itself'));
-  assert.ok(html.includes('Use Paste peaks or Upload file'));
+  assert.ok(html.includes('Holdout cosine'));
+  assert.ok(html.includes('Withheld known entry #42'));
+  assert.ok(html.includes('2 identical reference(s) removed'));
+  assert.ok(html.includes('remaining library explains this known spectrum'));
+  assert.ok(!html.includes('self-match cosine'));
 });
 test('CSV export preserves numeric signs and neutralizes text formulas',()=>{
   const output=csv([{name:'=1+1',residual:-4}],['name','residual']);
