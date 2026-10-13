@@ -90,7 +90,8 @@ class WebsiteTests(unittest.TestCase):
         from streamlit.testing.v1 import AppTest
         test_store = DATA / '__pycache__' / 'test_history.sqlite3'
         os.environ['SPECTRALAB_HISTORY_PATH'] = str(test_store)
-        app = AppTest.from_file(str(ROOT / 'app.py'), default_timeout=60).run()
+        target = ROOT / 'streamlit_app.py' if (ROOT / 'streamlit_app.py').exists() else ROOT / 'app.py'
+        app = AppTest.from_file(str(target), default_timeout=60).run()
         self.assertFalse(app.exception, str(app.exception))
         main_tabs = ['Overview', 'Spectrum analysis', 'Mixture simulator', 'Batch upload', 'Reference library', 'History', 'Evidence notebook', 'Methodology']
         self.assertEqual([t.label for t in app.tabs if t.label in main_tabs], main_tabs)

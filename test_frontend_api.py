@@ -2,6 +2,7 @@
 from pathlib import Path
 from threading import Thread
 import base64
+import csv
 import io
 import json
 import os
@@ -58,7 +59,19 @@ class FrontendAPI(unittest.TestCase):
         self.assertEqual(restored,report)
         self.assertTrue(self.request('/api/history'))
         with urllib.request.urlopen(self.base+'/api/history/'+report['run_id']+'/export?format=csv') as response:
-            self.assertTrue(response.read().startswith(b'mz,input,reconstructed,residual'))
+            self.assertIn('text/csv',response.headers['Content-Type'])
+            exported=response.read().decode('utf-8-sig')
+        table=csv.DictReader(io.StringIO(exported))
+        self.assertEqual(table.fieldnames,['Sample','Analysis method','Closest library match','Match entry ID',
+                         'Match formula','Match mass (Da)','Cosine similarity','Fit R-squared','Fit RMSE',
+                         'Residual/input (%)','m/z (nominal mass)','Input intensity (%)',
+                         'Reconstructed intensity (%)','Residual intensity (percentage points)'])
+        rows=list(table)
+        self.assertEqual(len(rows),541)
+        self.assertEqual(rows[0]['Sample'],'Cocaine')
+        self.assertEqual(rows[0]['Analysis method'],'Reference holdout check')
+        self.assertEqual(rows[0]['Closest library match'],report['best_name'])
+        self.assertEqual(rows[0]['m/z (nominal mass)'],'10')
 
     def test_mixture_and_sweep(self):
         body={'entry_ids':[1747,1110],'shares':[70,30],'noise':0,'loss':0,'extra':0,'seed':42,'mode':'analyze'}

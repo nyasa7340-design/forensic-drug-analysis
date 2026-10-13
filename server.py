@@ -29,8 +29,12 @@ from evidence_notebook import NotebookStore, now
 LIBRARY, MATRIX = load_library(DATA)
 DIGEST = hashlib.sha256((DATA / 'swgdrug_features.csv').read_bytes()).hexdigest()
 BY_ID = {int(row.id): i for i, row in LIBRARY.iterrows()}
-STORAGE = Path(os.environ.get('FORENSIC_STORAGE_DIR',str(DATA / '__pycache__')))
-STORAGE.mkdir(parents=True,exist_ok=True)
+try:
+    STORAGE = Path(os.environ.get('FORENSIC_STORAGE_DIR', str(DATA / '__pycache__')))
+    STORAGE.mkdir(parents=True, exist_ok=True)
+except OSError:
+    STORAGE = Path(os.environ.get('TEMP', '/tmp')) / 'forensic_storage'
+    STORAGE.mkdir(parents=True, exist_ok=True)
 NOTEBOOKS = NotebookStore(STORAGE / 'evidence_notebooks')
 
 
@@ -127,9 +131,24 @@ class Handler(SimpleHTTPRequestHandler):
                     if query.get('format',['json'])[0]=='csv':
                         stream = io.StringIO(newline='')
                         writer = csv.writer(stream)
-                        writer.writerow(['mz','input','reconstructed','residual'])
-                        writer.writerows(zip(MZ,report['query'],report['reconstructed'],report['residual']))
-                        return self.send_bytes(stream.getvalue().encode(),'text/csv',f'spectrum-{parts[2][:8]}.csv')
+                        best = next((match for match in report['matches']
+                                     if int(match['entry_id']) == int(report['best_entry_id'])), {})
+                        columns = ['Sample', 'Analysis method', 'Closest library match', 'Match entry ID',
+                                   'Match formula', 'Match mass (Da)', 'Cosine similarity', 'Fit R-squared',
+                                   'Fit RMSE', 'Residual/input (%)', 'm/z (nominal mass)',
+                                   'Input intensity (%)', 'Reconstructed intensity (%)',
+                                   'Residual intensity (percentage points)']
+                        writer.writerow(columns)
+                        summary = [report['sample'], report['source'], report['best_name'],
+                                   report['best_entry_id'], best.get('formula', ''), best.get('mw', ''),
+                                   round(report['cosine_similarity'], 6),
+                                   round(report['r_squared'], 6) if report['r_squared'] is not None else '',
+                                   round(report['rmse'], 6), round(report['relative_residual'] * 100, 4)]
+                        writer.writerows([*summary, int(mz), round(float(input_value), 6),
+                                          round(float(fit_value), 6), round(float(residual_value), 6)]
+                                         for mz, input_value, fit_value, residual_value in
+                                         zip(MZ, report['query'], report['reconstructed'], report['residual']))
+                        return self.send_bytes(stream.getvalue().encode('utf-8-sig'),'text/csv; charset=utf-8',f'spectrum-{parts[2][:8]}.csv')
                     return self.send_bytes(json.dumps(report,indent=2).encode(),'application/json',f'analysis-{parts[2][:8]}.json')
                 return self.send_json(report)
             if parts == ['api','notebooks']:

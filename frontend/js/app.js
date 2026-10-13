@@ -1,5 +1,5 @@
 import {api,filePayload,download,csv} from './api.js';
-import {escape,number,table,metrics,spectrum,sweepChart,reportHtml} from './components.js?v=analysis-holdout-20261013';
+import {escape,number,table,metrics,spectrum,sweepChart,reportHtml} from './components.js?v=analysis-csv-20261013';
 import {notebookController} from './notebook.js';
 
 const $=selector=>document.querySelector(selector);

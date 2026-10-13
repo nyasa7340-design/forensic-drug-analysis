@@ -13,7 +13,7 @@ python server.py --port 8503
 
 Open http://127.0.0.1:8503. To use another port, change `--port`. The frontend and API share one local origin; no Node.js installation, frontend build step, account, or API key is required. Opening `frontend/index.html` directly is insufficient because the real calculations require the local API.
 
-The previous Streamlit `app.py` remains available for compatibility, but `server.py` is the entry point for the new interface. Run only one server on a given port.
+The previous Streamlit `streamlit_app.py` remains available for compatibility, but `server.py` is the entry point for the new interface. Run only one server on a given port.
 
 ## Structure
 

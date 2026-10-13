@@ -87,7 +87,8 @@ class NotebookWebsiteTests(unittest.TestCase):
         with sqlite3.connect(directory / 'history.sqlite3') as conn:
             conn.execute('CREATE TABLE runs(id TEXT PRIMARY KEY,timestamp TEXT,sample TEXT,source TEXT,report TEXT)')
             conn.execute('INSERT INTO runs VALUES(?,?,?,?,?)',('test-run',test.report['timestamp'],'Test specimen','Test data',json.dumps(test.report)))
-        app = AppTest.from_file(str(ROOT/'app.py'),default_timeout=180).run()
+        target = ROOT / 'streamlit_app.py' if (ROOT / 'streamlit_app.py').exists() else ROOT / 'app.py'
+        app = AppTest.from_file(str(target),default_timeout=180).run()
         self.assertFalse(app.exception,str(app.exception))
         self.assertIn('Evidence notebook',[tab.label for tab in app.tabs])
         app.text_input(key='case_title').set_value('UI case')
