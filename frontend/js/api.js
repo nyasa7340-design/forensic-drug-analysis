@@ -1,11 +1,17 @@
-/** Same-origin transport. No scientific calculations are duplicated in the browser. */
+import {API_BASE_URL} from './config.js';
+
+export function apiUrl(path) {
+  return `${API_BASE_URL.replace(/\/+$/, '')}/api/${path}`;
+}
+
+/** Transport to the local server or the configured Render API. */
 export async function api(path, data) {
   let response;
   try {
-    response = await fetch(`/api/${path}`, data === undefined ? {} : {
+    response = await fetch(apiUrl(path), data === undefined ? {} : {
       method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
     });
-  } catch { throw new Error('The local analysis server is unavailable. Start it with python server.py.'); }
+  } catch { throw new Error(API_BASE_URL ? 'The analysis server is unavailable. Check the backend URL and allowed website origin.' : 'The analysis server is unavailable. Start it with python server.py.'); }
   const result = await response.json();
   if (!response.ok) throw new Error(result.error || 'The request could not be completed.');
   return result;

@@ -32,8 +32,8 @@
     </nav>
   </header>
   <section class="intro" aria-labelledby="site-title">
-    <div><p class="eyebrow">FORENSIC CHEMISTRY / LOCAL WORKSPACE</p><h1 id="site-title">Forensic spectral analysis</h1><p>Compare spectra. Examine mixture fits. Keep the evidence together.</p></div>
-    <div class="connection-chip"><span id="connection-light" class="status-light" aria-hidden="true"></span><span id="connection-label">Connecting to local library…</span></div>
+    <div><p class="eyebrow">FORENSIC CHEMISTRY / ANALYSIS WORKSPACE</p><h1 id="site-title">Forensic spectral analysis</h1><p>Compare spectra. Examine mixture fits. Keep the evidence together.</p></div>
+    <div class="connection-chip"><span id="connection-light" class="status-light" aria-hidden="true"></span><span id="connection-label">Connecting to reference library…</span></div>
   </section>
   <main id="workspace" class="working-panel" tabindex="-1" aria-label="Analysis workspace">
     <div class="workspace-bar"><span id="page-label">Workspace overview</span><span class="library-stamp">SWGDRUG 3.14 <span aria-hidden="true">·</span> m/z 10–550</span></div>
@@ -75,7 +75,7 @@
         <div class="card filter-bar"><div><label for="library-search">Compound, formula, or entry ID</label><input id="library-search" type="search" placeholder="Search the library"></div><div><label for="mass-min">Min. mass (Da)</label><input id="mass-min" type="number" min="0" value="0"></div><div><label for="mass-max">Max. mass (Da)</label><input id="mass-max" type="number" min="0" placeholder="No maximum"></div></div><p id="library-count" class="help"></p><div id="library-table" class="table-wrap"></div><div class="pagination"><button id="library-prev" class="secondary">Previous</button><span id="library-page"></span><button id="library-next" class="secondary">Next</button></div><div id="library-spectrum"></div>
       </section>
       <section id="page-history" class="page" aria-labelledby="history-title" hidden>
-        <div class="section-heading"><div><p class="eyebrow">SAVED RECORDS</p><h2 id="history-title">Analysis history</h2><p>Latest 500 runs on this computer. Browsing does not create new records.</p></div><button id="history-export" class="secondary">Export history index</button></div><div id="history-table" class="table-wrap"></div><div id="history-results" class="results"></div>
+        <div class="section-heading"><div><p class="eyebrow">SAVED RECORDS</p><h2 id="history-title">Analysis history</h2><p>Latest 500 runs saved on the analysis server. Browsing does not create new records.</p></div><button id="history-export" class="secondary">Export history index</button></div><div id="history-table" class="table-wrap"></div><div id="history-results" class="results"></div>
       </section>
       <section id="page-notebook" class="page" aria-labelledby="notebook-title" hidden>
         <div class="section-heading"><div><p class="eyebrow">EVIDENCE REVIEW</p><h2 id="notebook-title">Evidence notebook</h2><p>Preserve analyses, supporting files, and the observations behind a case.</p></div></div>
@@ -90,7 +90,7 @@
       </section>
     </div>
   </main>
-  <footer><span>forensic-drug-analysis</span><span>Local reference screening · Analyst review required</span></footer>
+  <footer><span>forensic-drug-analysis</span><span>Reference screening · Analyst review required</span></footer>
   <noscript>This application requires JavaScript to connect its controls to the local analysis server.</noscript>
 </body>
 </html>

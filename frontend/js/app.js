@@ -160,4 +160,4 @@ try {
   document.querySelectorAll('.reference-select').forEach(select=>select.innerHTML=options);
   $('#analysis-entry').value='1747';$('#sim-a').value='1747';$('#sim-b').value='1110';$('#sim-c').value='1836';
   updateShares();filterLibrary();await refreshOverview();await route();
-} catch(error) {$('#connection-label').textContent='Local server unavailable';notify(error.message,true);}
+} catch(error) {$('#connection-label').textContent='Analysis server unavailable';notify(error.message,true);}

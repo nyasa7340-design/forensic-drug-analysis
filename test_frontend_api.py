@@ -12,6 +12,7 @@ import urllib.request
 import urllib.error
 import uuid
 import zipfile
+from unittest.mock import patch
 
 HERE=Path(__file__).parent
 DATA=HERE if (HERE/'swgdrug_library.csv').exists() else HERE.parent.parent
@@ -119,6 +120,35 @@ class FrontendAPI(unittest.TestCase):
         with self.assertRaises(urllib.error.HTTPError) as error:
             urllib.request.urlopen(request)
         self.assertEqual(error.exception.code,403)
+
+    def test_deployed_frontend_cors(self):
+        origin = 'https://forensic-demo.vercel.app'
+        with patch.dict(os.environ, {'FORENSIC_ALLOWED_ORIGINS': origin}):
+            request = urllib.request.Request(self.base+'/api/status', method='OPTIONS',
+                headers={'Origin': origin, 'Access-Control-Request-Method': 'POST',
+                         'Access-Control-Request-Headers': 'content-type'})
+            with urllib.request.urlopen(request) as response:
+                self.assertEqual(response.status, 204)
+                self.assertEqual(response.headers['Access-Control-Allow-Origin'], origin)
+                self.assertIn('POST', response.headers['Access-Control-Allow-Methods'])
+            request = urllib.request.Request(self.base+'/api/notebooks',
+                data=json.dumps({'title': 'Cross-origin deployment test'}).encode(),
+                headers={'Content-Type': 'application/json', 'Origin': origin})
+            with urllib.request.urlopen(request) as response:
+                case_id = json.load(response)['id']
+                self.assertEqual(response.headers['Access-Control-Allow-Origin'], origin)
+            request = urllib.request.Request(self.base+'/api/notebooks/'+case_id+'/export?format=json',
+                headers={'Origin': origin})
+            with urllib.request.urlopen(request) as response:
+                self.assertEqual(response.headers['Access-Control-Allow-Origin'], origin)
+                self.assertIn('attachment', response.headers['Content-Disposition'])
+            for forbidden in ['https://unrelated.example', origin+'.evil.example']:
+                request = urllib.request.Request(self.base+'/api/status', method='OPTIONS',
+                    headers={'Origin': forbidden})
+                with self.assertRaises(urllib.error.HTTPError) as error:
+                    urllib.request.urlopen(request)
+                self.assertEqual(error.exception.code, 403)
+                self.assertIsNone(error.exception.headers.get('Access-Control-Allow-Origin'))
 
 
 if __name__=='__main__':

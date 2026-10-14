@@ -4,6 +4,8 @@ An HTML/CSS/JavaScript frontend connected to the existing Python spectral analys
 
 ## Run locally
 
+For Vercel frontend + Render backend deployment, follow [DEPLOYMENT.md](DEPLOYMENT.md).
+
 Use Python 3.10 or later from the repository directory:
 
 ```powershell

@@ -33,6 +33,8 @@ try:
     STORAGE = Path(os.environ.get('FORENSIC_STORAGE_DIR', str(DATA / '__pycache__')))
     STORAGE.mkdir(parents=True, exist_ok=True)
 except OSError:
+    if os.environ.get('FORENSIC_STORAGE_DIR'):
+        raise
     STORAGE = Path(os.environ.get('TEMP', '/tmp')) / 'forensic_storage'
     STORAGE.mkdir(parents=True, exist_ok=True)
 NOTEBOOKS = NotebookStore(STORAGE / 'evidence_notebooks')
@@ -89,6 +91,35 @@ class Handler(SimpleHTTPRequestHandler):
         # Keep routine requests out of the terminal; unexpected HTTP errors remain visible.
         if args and str(args[1] if len(args)>1 else '').startswith('5'):
             super().log_message(format,*args)
+
+    def origin_allowed(self):
+        origin = self.headers.get('Origin')
+        if not origin:
+            return True
+        allowed = {value.strip().rstrip('/') for value in
+                   os.environ.get('FORENSIC_ALLOWED_ORIGINS', '').split(',') if value.strip()}
+        parsed = urlparse(origin)
+        return (origin in allowed or
+                (parsed.scheme in {'http', 'https'} and parsed.netloc == self.headers.get('Host')))
+
+    def end_headers(self):
+        origin = self.headers.get('Origin')
+        if origin and self.origin_allowed():
+            self.send_header('Access-Control-Allow-Origin', origin)
+            self.send_header('Vary', 'Origin')
+        super().end_headers()
+
+    def do_OPTIONS(self):
+        if not self.path.startswith('/api/'):
+            return self.send_json({'error': 'Endpoint not found.'}, 404)
+        if not self.origin_allowed():
+            return self.send_json({'error': 'Website origin is not allowed.'}, 403)
+        self.send_response(204)
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Max-Age', '600')
+        self.send_header('Content-Length', '0')
+        self.end_headers()
 
     def send_bytes(self, payload, content_type, filename=None, status=200):
         self.send_response(status)
@@ -174,8 +205,8 @@ class Handler(SimpleHTTPRequestHandler):
     def do_POST(self):
         try:
             origin=self.headers.get('Origin')
-            if origin and urlparse(origin).netloc!=self.headers.get('Host'):
-                return self.send_json({'error':'Use the website on the same local server.'},403)
+            if not self.origin_allowed():
+                return self.send_json({'error':'Website origin is not allowed.'},403)
             if not self.headers.get('Content-Type','').startswith('application/json'):
                 return self.send_json({'error':'Requests must use application/json.'},415)
             length=int(self.headers.get('Content-Length','0'))
@@ -262,10 +293,11 @@ application = Handler
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port',type=int,default=8503)
+    parser.add_argument('--port',type=int,default=int(os.environ.get('PORT', '8503')))
+    parser.add_argument('--host',default=os.environ.get('HOST', '127.0.0.1'))
     args=parser.parse_args()
-    with ThreadingHTTPServer(('127.0.0.1',args.port),Handler) as server:
-        print(f'forensic-drug-analysis running at http://127.0.0.1:{args.port}',flush=True)
+    with ThreadingHTTPServer((args.host,args.port),Handler) as server:
+        print(f'forensic-drug-analysis running at http://{args.host}:{args.port}',flush=True)
         try:
             server.serve_forever()
         except KeyboardInterrupt:
